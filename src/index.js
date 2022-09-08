@@ -146,7 +146,7 @@ server.get("/session", async (req, res) => {
       .find({ userId })
       .toArray();
 
-    return res.sendStatus(200);
+    return res.status(200).send(userOperations);
   } catch (err) {
     return res.sendStatus(500);
   }
