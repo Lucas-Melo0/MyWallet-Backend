@@ -106,7 +106,7 @@ server.post("/income", async (req, res) => {
 server.post("/outcome", async (req, res) => {
   const { authorization } = req.headers;
   const { error } = validateOperation(req.body);
-  const token = authorization.replace("Bearer ", "");
+  const token = authorization?.replace("Bearer ", "");
 
   if (error) return res.sendStatus(400);
 
@@ -123,6 +123,28 @@ server.post("/outcome", async (req, res) => {
     await db
       .collection("operations")
       .insertOne({ ...req.body, name, userId, operation: "outcome" });
+
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.sendStatus(500);
+  }
+});
+
+server.get("/session", async (req, res) => {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "");
+
+  if (!token) return res.sendStatus(401);
+  try {
+    const session = await db.collection("sessions").findOne({ token });
+
+    if (!session) return res.sendStatus(401);
+
+    const { userId } = session;
+    const userOperations = await db
+      .collection("operations")
+      .find({ userId })
+      .toArray();
 
     return res.sendStatus(200);
   } catch (err) {
