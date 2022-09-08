@@ -9,6 +9,12 @@ const signUpSchema = Joi.object({
   confirmation: Joi.ref("password"),
 });
 
-const validateSignUp = validator(signUpSchema);
+const signInSchema = Joi.object({
+  email: Joi.string().required(),
+  password: Joi.string().required(),
+});
 
-export { validateSignUp };
+const validateSignUp = validator(signUpSchema);
+const validateSignIn = validator(signInSchema);
+
+export { validateSignUp, validateSignIn };

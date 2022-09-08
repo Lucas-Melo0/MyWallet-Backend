@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { MongoClient } from "mongodb";
-import { validateSignUp } from "./validator.js";
+import { v4 as uuidv4 } from "uuid";
+
+import { validateSignIn, validateSignUp } from "./validator.js";
 import bcrypt from "bcrypt";
 
 const server = express();
@@ -39,7 +41,35 @@ server.post("/sign-up", async (req, res) => {
       .insertOne({ ...req.body, password: hashedPassword });
 
     res.sendStatus(201);
-  } catch (error) {
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+server.post("/sign-in", async (req, res) => {
+  const { error } = validateSignIn(req.body);
+  const { password, email } = req.body;
+
+  if (error) {
+    return res.sendStatus(400);
+  }
+
+  try {
+    const users = await db.collection("users").find().toArray();
+    const isValidUser = users.find(
+      (user) =>
+        user.email === email && bcrypt.compareSync(password, user.password)
+    );
+
+    if (isValidUser) {
+      console.log(isValidUser);
+      const { _id } = isValidUser;
+      const token = uuidv4();
+      await db.collection("sessions").insertOne({ userId: _id, token });
+      return res.status(200).send({ token });
+    }
+    return res.sendStatus(404);
+  } catch (err) {
     res.sendStatus(500);
   }
 });
