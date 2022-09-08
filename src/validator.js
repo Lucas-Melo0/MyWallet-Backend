@@ -14,7 +14,13 @@ const signInSchema = Joi.object({
   password: Joi.string().required(),
 });
 
+const operationSchema = Joi.object({
+  value: Joi.string().required(),
+  description: Joi.string().required(),
+});
+
 const validateSignUp = validator(signUpSchema);
 const validateSignIn = validator(signInSchema);
+const validateOperation = validator(operationSchema);
 
-export { validateSignUp, validateSignIn };
+export { validateSignUp, validateSignIn, validateOperation };

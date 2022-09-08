@@ -3,7 +3,11 @@ import cors from "cors";
 import { MongoClient } from "mongodb";
 import { v4 as uuidv4 } from "uuid";
 
-import { validateSignIn, validateSignUp } from "./validator.js";
+import {
+  validateOperation,
+  validateSignIn,
+  validateSignUp,
+} from "./validator.js";
 import bcrypt from "bcrypt";
 
 const server = express();
@@ -62,15 +66,41 @@ server.post("/sign-in", async (req, res) => {
     );
 
     if (isValidUser) {
-      console.log(isValidUser);
-      const { _id } = isValidUser;
+      const { _id, name } = isValidUser;
       const token = uuidv4();
       await db.collection("sessions").insertOne({ userId: _id, token });
-      return res.status(200).send({ token });
+      return res.status(200).send({ name, token });
     }
     return res.sendStatus(404);
   } catch (err) {
     res.sendStatus(500);
+  }
+});
+
+server.post("/income", async (req, res) => {
+  const { authorization } = req.headers;
+  const { error } = validateOperation(req.body);
+  const token = authorization.replace("Bearer ", "");
+
+  if (error) return res.sendStatus(400);
+
+  if (!token) return res.sendStatus(401);
+
+  try {
+    const session = await db.collection("sessions").findOne({ token });
+    const { userId } = session;
+
+    if (!session) return res.sendStatus(401);
+
+    const user = await db.collection("users").findOne({ _id: userId });
+    const { name } = user;
+    await db
+      .collection("operations")
+      .insertOne({ ...req.body, name, userId, operation: "income" });
+
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.sendStatus(500);
   }
 });
 
