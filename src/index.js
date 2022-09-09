@@ -129,15 +129,13 @@ server.post("/outcome", async (req, res) => {
 
     const user = await db.collection("users").findOne({ _id: userId });
     const { name } = user;
-    await db
-      .collection("operations")
-      .insertOne({
-        ...req.body,
-        name,
-        userId,
-        operation: "outcome",
-        date: currentDate(),
-      });
+    await db.collection("operations").insertOne({
+      ...req.body,
+      name,
+      userId,
+      operation: "outcome",
+      date: currentDate(),
+    });
 
     return res.sendStatus(200);
   } catch (err) {
@@ -162,6 +160,20 @@ server.get("/session", async (req, res) => {
       .toArray();
 
     return res.status(200).send(userOperations);
+  } catch (err) {
+    return res.sendStatus(500);
+  }
+});
+
+server.delete("/sign-in", async (req, res) => {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "");
+
+  if (!token) return res.sendStatus(401);
+
+  try {
+    await db.collection("sessions").deleteOne({ token });
+    return res.sendStatus(200);
   } catch (err) {
     return res.sendStatus(500);
   }
