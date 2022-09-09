@@ -3,6 +3,7 @@ import cors from "cors";
 import { MongoClient } from "mongodb";
 import { v4 as uuidv4 } from "uuid";
 import {
+  validateDeletion,
   validateOperation,
   validateSignIn,
   validateSignUp,
@@ -87,7 +88,6 @@ server.post("/income", async (req, res) => {
   const token = authorization?.replace("Bearer ", "");
 
   if (error) return res.sendStatus(400);
-
   if (!token) return res.sendStatus(401);
 
   try {
@@ -118,7 +118,6 @@ server.post("/outcome", async (req, res) => {
   const token = authorization?.replace("Bearer ", "");
 
   if (error) return res.sendStatus(400);
-
   if (!token) return res.sendStatus(401);
 
   try {
@@ -148,6 +147,7 @@ server.get("/session", async (req, res) => {
   const token = authorization?.replace("Bearer ", "");
 
   if (!token) return res.sendStatus(401);
+
   try {
     const session = await db.collection("sessions").findOne({ token });
 
@@ -173,6 +173,23 @@ server.delete("/sign-in", async (req, res) => {
 
   try {
     await db.collection("sessions").deleteOne({ token });
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.sendStatus(500);
+  }
+});
+
+server.delete("/transactions", async (req, res) => {
+  const { authorization } = req.headers;
+  const token = authorization.replace("Bearer ", "");
+  const { error } = validateDeletion(req.body);
+  const { operationId } = req.body;
+
+  if (error) return res.sendStatus(400);
+  if (!token) return res.sendStatus(401);
+
+  try {
+    await db.collection("operations").deleteOne({ _id: operationId });
     return res.sendStatus(200);
   } catch (err) {
     return res.sendStatus(500);

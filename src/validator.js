@@ -19,8 +19,13 @@ const operationSchema = Joi.object({
   description: Joi.string().required(),
 });
 
+const deleteOperationSchema = Joi.object({
+  operationId: Joi.string().required(),
+});
+
 const validateSignUp = validator(signUpSchema);
 const validateSignIn = validator(signInSchema);
 const validateOperation = validator(operationSchema);
+const validateDeletion = validator(deleteOperationSchema);
 
-export { validateSignUp, validateSignIn, validateOperation };
+export { validateSignUp, validateSignIn, validateOperation, validateDeletion };
