@@ -18,6 +18,10 @@ let db;
 mongoClient.connect().then(() => {
   db = mongoClient.db("myWallet");
 });
+const currentDate = () => {
+  let date = new Date().toLocaleDateString("pt-br");
+  return date.slice(0, 5);
+};
 
 server.post("/sign-up", async (req, res) => {
   const { error } = validateSignUp(req.body);
@@ -67,6 +71,7 @@ server.post("/sign-in", async (req, res) => {
     if (isValidUser) {
       const { _id, name } = isValidUser;
       const token = uuidv4();
+
       await db.collection("sessions").insertOne({ userId: _id, token });
       return res.status(200).send({ name, token });
     }
@@ -79,7 +84,7 @@ server.post("/sign-in", async (req, res) => {
 server.post("/income", async (req, res) => {
   const { authorization } = req.headers;
   const { error } = validateOperation(req.body);
-  const token = authorization.replace("Bearer ", "");
+  const token = authorization?.replace("Bearer ", "");
 
   if (error) return res.sendStatus(400);
 
@@ -93,9 +98,13 @@ server.post("/income", async (req, res) => {
 
     const user = await db.collection("users").findOne({ _id: userId });
     const { name } = user;
-    await db
-      .collection("operations")
-      .insertOne({ ...req.body, name, userId, operation: "income" });
+    await db.collection("operations").insertOne({
+      ...req.body,
+      name,
+      userId,
+      operation: "income",
+      date: currentDate(),
+    });
 
     return res.sendStatus(200);
   } catch (err) {
@@ -122,7 +131,13 @@ server.post("/outcome", async (req, res) => {
     const { name } = user;
     await db
       .collection("operations")
-      .insertOne({ ...req.body, name, userId, operation: "outcome" });
+      .insertOne({
+        ...req.body,
+        name,
+        userId,
+        operation: "outcome",
+        date: currentDate(),
+      });
 
     return res.sendStatus(200);
   } catch (err) {
