@@ -71,7 +71,7 @@ server.post("/sign-in", async (req, res) => {
     if (isValidUser) {
       const { _id, name } = isValidUser;
       const token = uuidv4();
-
+      await db.collection("sessions").deleteMany({ userId: _id });
       await db.collection("sessions").insertOne({ userId: _id, token });
       return res.status(200).send({ name, token });
     }
