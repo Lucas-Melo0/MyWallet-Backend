@@ -1,9 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { v4 as uuidv4 } from "uuid";
 import {
-  validateDeletion,
   validateOperation,
   validateSignIn,
   validateSignUp,
@@ -179,17 +178,15 @@ server.delete("/sign-in", async (req, res) => {
   }
 });
 
-server.delete("/transactions", async (req, res) => {
+server.delete("/transactions/:id", async (req, res) => {
   const { authorization } = req.headers;
-  const token = authorization.replace("Bearer ", "");
-  const { error } = validateDeletion(req.body);
-  const { operationId } = req.body;
+  const token = authorization?.replace("Bearer ", "");
+  const { id } = req.params;
 
-  if (error) return res.sendStatus(400);
-  if (!token) return res.sendStatus(401);
+  if (!token || !id) return res.sendStatus(401);
 
   try {
-    await db.collection("operations").deleteOne({ _id: operationId });
+    await db.collection("operations").deleteOne({ _id: ObjectId(id) });
     return res.sendStatus(200);
   } catch (err) {
     return res.sendStatus(500);
