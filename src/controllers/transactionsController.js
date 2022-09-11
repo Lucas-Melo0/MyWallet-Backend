@@ -46,7 +46,7 @@ const expenseTransaction = async (req, res) => {
       ...req.body,
       name,
       userId,
-      operation: "outcome",
+      operation: "expenses",
       date: currentDate(),
     });
 
@@ -88,9 +88,24 @@ const removeTransaction = async (req, res) => {
   }
 };
 
+const editTransaction = async (req, res) => {
+  const { id } = req.params;
+  if (!id) return res.sendStatus(401);
+
+  try {
+    await db
+      .collection("operations")
+      .updateOne({ _id: ObjectId(id) }, { $set: { description } });
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.sendStatus(500);
+  }
+};
+
 export {
   incomeTransaction,
   expenseTransaction,
   getTransactions,
   removeTransaction,
+  editTransaction,
 };
