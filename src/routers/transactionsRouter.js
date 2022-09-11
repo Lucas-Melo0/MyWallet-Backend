@@ -10,7 +10,7 @@ import { operationValidation } from "../middlewares/operationValidationMiddlewar
 const router = express.Router();
 
 router.post("/income", operationValidation, incomeTransaction);
-router.post("/outcome", operationValidation, expenseTransaction);
+router.post("/expenses", operationValidation, expenseTransaction);
 router.get("/session", getTransactions);
 router.delete("/transactions/:id", removeTransaction);
 
