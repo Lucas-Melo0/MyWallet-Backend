@@ -5,11 +5,12 @@ import {
   removeTransaction,
 } from "../controllers/transactionsController.js";
 import express from "express";
+import { operationValidation } from "../middlewares/operationValidationMiddleware.js";
 
 const router = express.Router();
 
-router.post("/income", incomeTransaction);
-router.post("/outcome", expenseTransaction);
+router.post("/income", operationValidation, incomeTransaction);
+router.post("/outcome", operationValidation, expenseTransaction);
 router.get("/session", getTransactions);
 router.delete("/transactions/:id", removeTransaction);
 

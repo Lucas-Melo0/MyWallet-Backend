@@ -1,17 +1,11 @@
-import { validateSignUp, validateSignIn } from "../validator.js";
+import { validateSignIn } from "../validator.js";
 import { db } from "../database/db.js";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
 const userSignup = async (req, res) => {
-  const { error } = validateSignUp(req.body);
-  const { password, name, email } = req.body;
-
-  if (error) {
-    return res.sendStatus(400);
-  }
-
   try {
+    const { password, name, email } = req.body;
     const users = await db.collection("users").find().toArray();
     const isDuplicate = users.find(
       (user) => user.name === name || user.email === email
@@ -34,14 +28,8 @@ const userSignup = async (req, res) => {
 };
 
 const userSignin = async (req, res) => {
-  const { error } = validateSignIn(req.body);
-  const { password, email } = req.body;
-
-  if (error) {
-    return res.sendStatus(400);
-  }
-
   try {
+    const { password, email } = req.body;
     const users = await db.collection("users").find().toArray();
     const isValidUser = users.find(
       (user) =>

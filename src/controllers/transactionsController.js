@@ -1,5 +1,4 @@
 import { db } from "../database/db.js";
-import { validateOperation } from "../validator.js";
 import { ObjectId } from "mongodb";
 
 const currentDate = () => {
@@ -8,9 +7,7 @@ const currentDate = () => {
 };
 
 const incomeTransaction = async (req, res) => {
-  const { error } = validateOperation(req.body);
-
-  if (error) return res.sendStatus(400);
+  const token = res.locals.token;
 
   try {
     const session = await db.collection("sessions").findOne({ token });
@@ -35,9 +32,7 @@ const incomeTransaction = async (req, res) => {
 };
 
 const expenseTransaction = async (req, res) => {
-  const { error } = validateOperation(req.body);
-
-  if (error) return res.sendStatus(400);
+  const token = res.locals.token;
 
   try {
     const session = await db.collection("sessions").findOne({ token });
@@ -62,6 +57,7 @@ const expenseTransaction = async (req, res) => {
 };
 
 const getTransactions = async (req, res) => {
+  const token = res.locals.token;
   try {
     const session = await db.collection("sessions").findOne({ token });
 
