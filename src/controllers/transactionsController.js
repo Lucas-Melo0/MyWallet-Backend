@@ -95,7 +95,7 @@ const editTransaction = async (req, res) => {
   try {
     await db
       .collection("operations")
-      .updateOne({ _id: ObjectId(id) }, { $set: { description } });
+      .updateOne({ _id: ObjectId(id) }, { $set: req.body });
     return res.sendStatus(200);
   } catch (err) {
     return res.sendStatus(500);
